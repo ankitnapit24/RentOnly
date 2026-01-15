@@ -8,7 +8,17 @@ require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-app.use(cors());
+
+/* ================= CORS - ALLOW FRONTEND ================= */
+app.use(cors({
+  origin: [
+    "http://localhost:5173", // Local development
+    "https://your-frontend.vercel.app", // Replace with your actual Vercel URL
+    "https://your-frontend.netlify.app" // Or Netlify URL
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
 /* ================= CLOUDINARY CONFIG ================= */
@@ -240,4 +250,4 @@ app.get("/admin/enquiries", (req, res) => {
 });
 
 /* ================= START ================= */
-app.listen(5000, () => console.log("🚀 Server running on 5000"));
+app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
