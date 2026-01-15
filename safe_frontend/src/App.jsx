@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import API_URL from "./config";
 
 function App() {
   const [rooms, setRooms] = useState([]);
@@ -38,12 +39,12 @@ function App() {
   const [uploading, setUploading] = useState(false);
   
   // Image popup state
-  const [imagePopup, setImagePopup] = useState(null); // { room, index }
+  const [imagePopup, setImagePopup] = useState(null);
 
   /* ================= FETCH ================= */
 
   const fetchRooms = (location = "", min = "", max = "") => {
-    let url = "http://localhost:5000/rooms";
+    let url = `${API_URL}/rooms`;
     const params = [];
 
     if (location.trim() !== "") {
@@ -58,25 +59,29 @@ function App() {
 
     fetch(url)
       .then((res) => res.json())
-      .then(setRooms);
+      .then(setRooms)
+      .catch((err) => console.error("Error fetching rooms:", err));
   };
 
   const fetchPendingRooms = () => {
-    fetch("http://localhost:5000/admin/rooms")
+    fetch(`${API_URL}/admin/rooms`)
       .then((res) => res.json())
-      .then(setPendingRooms);
+      .then(setPendingRooms)
+      .catch((err) => console.error("Error fetching pending rooms:", err));
   };
 
   const fetchEnquiries = () => {
-    fetch("http://localhost:5000/admin/enquiries")
+    fetch(`${API_URL}/admin/enquiries`)
       .then((res) => res.json())
-      .then(setEnquiries);
+      .then(setEnquiries)
+      .catch((err) => console.error("Error fetching enquiries:", err));
   };
 
   const fetchAllApprovedRooms = () => {
-    fetch("http://localhost:5000/rooms")
+    fetch(`${API_URL}/rooms`)
       .then((res) => res.json())
-      .then(setAllApprovedRooms);
+      .then(setAllApprovedRooms)
+      .catch((err) => console.error("Error fetching approved rooms:", err));
   };
 
   useEffect(() => {
@@ -86,35 +91,35 @@ function App() {
   /* ================= ADMIN ACTIONS ================= */
 
   const approveRoom = (id) => {
-    fetch(`http://localhost:5000/admin/rooms/${id}/approve`, {
+    fetch(`${API_URL}/admin/rooms/${id}/approve`, {
       method: "PUT",
     }).then(() => {
       alert("Room approved ✅");
       fetchPendingRooms();
       fetchRooms();
-    });
+    }).catch((err) => console.error("Error approving room:", err));
   };
 
   const rejectRoom = (id) => {
-    fetch(`http://localhost:5000/admin/rooms/${id}/reject`, {
+    fetch(`${API_URL}/admin/rooms/${id}/reject`, {
       method: "DELETE",
     }).then(() => {
       alert("Room rejected ❌");
       fetchPendingRooms();
-    });
+    }).catch((err) => console.error("Error rejecting room:", err));
   };
 
   const deleteRoom = (id) => {
     if (!window.confirm("Delete this room?")) return;
 
-    fetch(`http://localhost:5000/admin/rooms/${id}`, {
+    fetch(`${API_URL}/admin/rooms/${id}`, {
       method: "DELETE",
     }).then(() => {
       alert("Room deleted 🗑️");
       fetchRooms();
       fetchPendingRooms();
       fetchAllApprovedRooms();
-    });
+    }).catch((err) => console.error("Error deleting room:", err));
   };
 
   /* ================= ADD ROOM WITH FILE UPLOAD ================= */
@@ -155,7 +160,7 @@ function App() {
     setUploading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/rooms", {
+      const res = await fetch(`${API_URL}/rooms`, {
         method: "POST",
         body: formData,
       });
@@ -192,7 +197,7 @@ function App() {
       return;
     }
 
-    fetch("http://localhost:5000/enquiry", {
+    fetch(`${API_URL}/enquiry`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -205,13 +210,13 @@ function App() {
       setSelectedRoom(null);
       setName("");
       setPhone("");
-    });
+    }).catch((err) => console.error("Error submitting enquiry:", err));
   };
 
   /* ================= ADMIN LOGIN ================= */
 
   const adminLogin = () => {
-    fetch("http://localhost:5000/admin/login", {
+    fetch(`${API_URL}/admin/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
