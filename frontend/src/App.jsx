@@ -234,7 +234,7 @@ function App() {
         fetchPendingRooms();
         fetchEnquiries();
       })
-      .catch(() => alert("Invalid admin credentials ❌"));
+      .catch(() => alert("Invalid admin- credentials ❌"));
   };
 
   const exitAdmin = () => {
