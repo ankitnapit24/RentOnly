@@ -202,14 +202,21 @@ app.get("/admin/enquiries", async (req, res) => {
 
 const fs = require("fs");
 /* ================= SERVE FRONTEND ================= */
-const frontendPath = path.join(__dirname, "frontend/dist");
-if (fs.existsSync(frontendPath)) {
-  app.use(express.static(frontendPath));
+const frontendPath = path.join(__dirname, "frontend", "dist");
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(frontendPath, "index.html"));
-  });
-}
+// Log for debugging on Render
+console.log("Serving frontend from:", frontendPath);
+
+app.use(express.static(frontendPath));
+
+app.get("*", (req, res) => {
+  const indexPath = path.join(frontendPath, "index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("Frontend build not found. Please run 'npm run build' first.");
+  }
+});
 
 /* ================= START ================= */
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
