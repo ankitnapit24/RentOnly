@@ -16,9 +16,9 @@ const port = process.env.PORT || 5000;
 /* ================= CORS - ALLOW FRONTEND ================= */
 app.use(cors({
   origin: [
-    "http://localhost:5173",
-    "https://your-frontend.vercel.app",
-    "https://your-frontend.netlify.app"
+    "http://localhost:5173", // Local development
+    "https://your-frontend.vercel.app", // Replace with your actual Vercel URL
+    "https://your-frontend.netlify.app" // Or Netlify URL
   ],
   credentials: true
 }));
@@ -47,22 +47,6 @@ const upload = multer({ storage: storage });
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-/* ================= HELPER FUNCTION TO TRANSFORM ROOM DATA ================= */
-const transformRoom = (room) => {
-  const roomObj = room.toObject();
-  return {
-    id: roomObj._id.toString(),
-    title: roomObj.title,
-    location: roomObj.location,
-    price: roomObj.price,
-    room_type: roomObj.room_type,
-    image_url: roomObj.image_url,
-    images: Array.isArray(roomObj.images) ? roomObj.images : [],
-    status: roomObj.status,
-    created_at: roomObj.created_at
-  };
-};
 
 /* ================= API ROUTES ================= */
 
@@ -101,13 +85,14 @@ app.get("/rooms", async (req, res) => {
     }
 
     const rooms = await Room.find(query).sort({ created_at: -1 });
-    const transformedRooms = rooms.map(transformRoom);
-    
-    console.log(`✅ Fetched ${transformedRooms.length} approved rooms`);
+    // Transform to include id field for frontend compatibility
+    const transformedRooms = rooms.map(r => ({
+      ...r.toObject(),
+      id: r._id
+    }));
     res.json(transformedRooms);
   } catch (err) {
-    console.error("❌ Error fetching rooms:", err);
-    res.status(500).json({ error: err.message, rooms: [] });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -138,7 +123,6 @@ app.post("/rooms", upload.array("images", 5), async (req, res) => {
     });
 
     await newRoom.save();
-    console.log("✅ New room added:", newRoom._id);
     res.json({ success: true, message: "Room submitted ⏳" });
   } catch (err) {
     console.error("❌ Room add error:", err);
@@ -150,65 +134,40 @@ app.post("/rooms", upload.array("images", 5), async (req, res) => {
 app.get("/admin/rooms", async (req, res) => {
   try {
     const rooms = await Room.find({ status: "PENDING" }).sort({ created_at: -1 });
-    const transformedRooms = rooms.map(transformRoom);
-    
-    console.log(`✅ Fetched ${transformedRooms.length} pending rooms`);
+    const transformedRooms = rooms.map(r => ({
+      ...r.toObject(),
+      id: r._id
+    }));
     res.json(transformedRooms);
   } catch (err) {
-    console.error("❌ Error fetching pending rooms:", err);
-    res.status(500).json({ error: err.message, rooms: [] });
+    res.status(500).json({ error: err.message });
   }
 });
 
 /* ================= ADMIN ACTIONS ================= */
 app.put("/admin/rooms/:id/approve", async (req, res) => {
   try {
-    const room = await Room.findByIdAndUpdate(
-      req.params.id, 
-      { status: "APPROVED" },
-      { new: true }
-    );
-    
-    if (!room) {
-      return res.status(404).json({ error: "Room not found" });
-    }
-    
-    console.log("✅ Room approved:", req.params.id);
-    res.json({ message: "Approved", room: transformRoom(room) });
+    await Room.findByIdAndUpdate(req.params.id, { status: "APPROVED" });
+    res.json({ message: "Approved" });
   } catch (err) {
-    console.error("❌ Error approving room:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.delete("/admin/rooms/:id/reject", async (req, res) => {
   try {
-    const room = await Room.findByIdAndDelete(req.params.id);
-    
-    if (!room) {
-      return res.status(404).json({ error: "Room not found" });
-    }
-    
-    console.log("✅ Room rejected:", req.params.id);
+    await Room.findByIdAndDelete(req.params.id);
     res.json({ message: "Rejected" });
   } catch (err) {
-    console.error("❌ Error rejecting room:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.delete("/admin/rooms/:id", async (req, res) => {
   try {
-    const room = await Room.findByIdAndDelete(req.params.id);
-    
-    if (!room) {
-      return res.status(404).json({ error: "Room not found" });
-    }
-    
-    console.log("✅ Room deleted:", req.params.id);
+    await Room.findByIdAndDelete(req.params.id);
     res.json({ message: "Deleted" });
   } catch (err) {
-    console.error("❌ Error deleting room:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -217,59 +176,43 @@ app.delete("/admin/rooms/:id", async (req, res) => {
 app.post("/enquiry", async (req, res) => {
   try {
     const { room_id, name, phone } = req.body;
-    
-    if (!room_id || !name || !phone) {
-      return res.status(400).json({ error: "All fields required" });
-    }
-    
     const newEnquiry = new Enquiry({ room_id, name, phone });
     await newEnquiry.save();
-    
-    console.log("✅ Enquiry saved:", newEnquiry._id);
-    res.json({ message: "Saved", success: true });
+    res.json({ message: "Saved" });
   } catch (err) {
-    console.error("❌ Error saving enquiry:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.get("/admin/enquiries", async (req, res) => {
   try {
-    const enquiries = await Enquiry.find()
-      .populate("room_id", "title")
-      .sort({ created_at: -1 });
-    
-    const transformedEnquiries = enquiries.map(e => {
-      const enquiryObj = e.toObject();
-      return {
-        id: enquiryObj._id.toString(),
-        room_id: enquiryObj.room_id ? enquiryObj.room_id._id.toString() : null,
-        room_title: enquiryObj.room_id ? enquiryObj.room_id.title : "Deleted Room",
-        name: enquiryObj.name,
-        phone: enquiryObj.phone,
-        created_at: enquiryObj.created_at
-      };
-    });
-    
-    console.log(`✅ Fetched ${transformedEnquiries.length} enquiries`);
+    const enquiries = await Enquiry.find().populate("room_id", "title").sort({ created_at: -1 });
+    // Transform to match old MySQL structure if needed by frontend
+    const transformedEnquiries = enquiries.map(e => ({
+      ...e.toObject(),
+      id: e._id,
+      room_title: e.room_id ? e.room_id.title : "Deleted Room",
+      room_id: e.room_id ? e.room_id._id : null
+    }));
     res.json(transformedEnquiries);
   } catch (err) {
-    console.error("❌ Error fetching enquiries:", err);
-    res.status(500).json({ error: err.message, enquiries: [] });
+    res.status(500).json({ error: err.message });
   }
 });
 
+const fs = require("fs");
 /* ================= SERVE FRONTEND ================= */
 const frontendPath = path.join(__dirname, "frontend", "dist");
 
+// Log for debugging on Render
 console.log("Serving frontend from:", frontendPath);
 
 app.use(express.static(frontendPath));
 
 app.get("/*", (req, res) => {
-  const indexPath = path.join(frontendPath, "index.html");
-  res.sendFile(indexPath);
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 /* ================= START ================= */
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+
