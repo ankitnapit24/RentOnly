@@ -234,7 +234,7 @@ function App() {
         fetchPendingRooms();
         fetchEnquiries();
       })
-      .catch(() => alert("Invalid admin- credentials ❌"));
+      .catch(() => alert("Invalid admin credentials ❌"));
   };
 
   const exitAdmin = () => {
@@ -252,7 +252,7 @@ function App() {
     <div className="container">
       {/* TOP BAR */}
       <div className="top-bar">
-        <h1>🏠 Rent Only </h1>
+        <h1>🏠 Rent Only</h1>
 
         <div className="top-actions">
           <button
@@ -279,9 +279,10 @@ function App() {
       {/* USER VIEW */}
       {!adminMode && (
         <>
-          {/* FILTERS */}
-          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          {/* FILTERS - FIXED: Removed inline styles */}
+          <div className="filters-container">
             <input
+              type="text"
               placeholder="Search by location"
               value={filterLocation}
               onChange={(e) => {
@@ -330,7 +331,6 @@ function App() {
                       }
                       alt={room.title}
                       onClick={() => setImagePopup({ room, index: imageIndexMap[room.id] || 0 })}
-                      style={{ cursor: "pointer" }}
                     />
 
                     {room.images && room.images.length > 1 && (
@@ -365,16 +365,19 @@ function App() {
                     )}
                   </div>
 
-                  <div className="room-title">{room.title}</div>
-                  <div>📍 {room.location}</div>
-                  <div>₹ {room.price}</div>
-                  <div>🛏 {room.room_type}</div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setSelectedRoom(room)}
-                  >
-                    I'm Interested
-                  </button>
+                  {/* FIXED: Wrapped content in room-content div */}
+                  <div className="room-content">
+                    <div className="room-title">{room.title}</div>
+                    <div className="room-info">📍 {room.location}</div>
+                    <div className="room-info">₹ {room.price}</div>
+                    <div className="room-info">🛏 {room.room_type}</div>
+                    <button
+                      className="btn btn-primary room-btn"
+                      onClick={() => setSelectedRoom(room)}
+                    >
+                      I'm Interested
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -384,16 +387,15 @@ function App() {
 
       {/* ADMIN PANEL - MAIN MENU */}
       {adminMode && !deleteMode && !pendingApprovalMode && !enquiryMode && (
-        <div style={{ textAlign: "center", padding: "40px" }}>
-          <h2 style={{ marginBottom: "30px" }}>Admin Panel</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "15px", maxWidth: "400px", margin: "0 auto" }}>
+        <div className="admin-menu-container">
+          <h2>Admin Panel</h2>
+          <div className="admin-menu-buttons">
             <button
               className="btn btn-primary"
               onClick={() => {
                 setpendingApprovalMode(true);
                 fetchPendingRooms();
               }}
-              style={{ padding: "15px", fontSize: "16px" }}
             >
               📋 Pending Approvals
             </button>
@@ -404,7 +406,6 @@ function App() {
                 setEnquiryMode(true);
                 fetchEnquiries();
               }}
-              style={{ padding: "15px", fontSize: "16px" }}
             >
               📩 View Enquiries
             </button>
@@ -415,7 +416,6 @@ function App() {
                 setDeleteMode(true);
                 fetchAllApprovedRooms();
               }}
-              style={{ padding: "15px", fontSize: "16px" }}
             >
               🗑️ Delete Approved Rooms
             </button>
@@ -447,7 +447,6 @@ function App() {
                     }
                     alt={room.title}
                     onClick={() => setImagePopup({ room, index: imageIndexMap[room.id] || 0 })}
-                    style={{ cursor: "pointer" }}
                   />
 
                   {room.images && room.images.length > 1 && (
@@ -480,25 +479,27 @@ function App() {
                   )}
                 </div>
 
-                <div className="room-title">{room.title}</div>
-                <div>📍 {room.location}</div>
-                <div>₹ {room.price}</div>
-                <div>🛏 {room.room_type}</div>
+                <div className="room-content">
+                  <div className="room-title">{room.title}</div>
+                  <div className="room-info">📍 {room.location}</div>
+                  <div className="room-info">₹ {room.price}</div>
+                  <div className="room-info">🛏 {room.room_type}</div>
 
-                <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => approveRoom(room.id)}
-                  >
-                    Approve
-                  </button>
+                  <div className="admin-actions">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => approveRoom(room.id)}
+                    >
+                      Approve
+                    </button>
 
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => rejectRoom(room.id)}
-                  >
-                    Reject
-                  </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => rejectRoom(room.id)}
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -524,13 +525,15 @@ function App() {
               </div>
             ) : (
               enquiries.map((e) => (
-                <div className="room-card" key={e.id}>
-                  <b>{e.room_title}</b>
-                  <p>👤 {e.name}</p>
-                  <p>📞 {e.phone}</p>
-                  <p style={{ fontSize: "12px", color: "#888" }}>
-                    {new Date(e.created_at).toLocaleDateString()}
-                  </p>
+                <div className="room-card enquiry-card" key={e.id}>
+                  <div className="room-content">
+                    <b>{e.room_title}</b>
+                    <p>👤 {e.name}</p>
+                    <p>📞 {e.phone}</p>
+                    <p style={{ fontSize: "12px", color: "#888" }}>
+                      {new Date(e.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               ))
             )}
@@ -565,7 +568,6 @@ function App() {
                     }
                     alt={room.title}
                     onClick={() => setImagePopup({ room, index: imageIndexMap[room.id] || 0 })}
-                    style={{ cursor: "pointer" }}
                   />
 
                   {room.images && room.images.length > 1 && (
@@ -597,15 +599,17 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div className="room-title">{room.title}</div>
-                <div>📍 {room.location}</div>
-                <div>₹ {room.price}</div>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => deleteRoom(room.id)}
-                >
-                  Delete
-                </button>
+                <div className="room-content">
+                  <div className="room-title">{room.title}</div>
+                  <div className="room-info">📍 {room.location}</div>
+                  <div className="room-info">₹ {room.price}</div>
+                  <button
+                    className="btn btn-danger room-btn"
+                    onClick={() => deleteRoom(room.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))
             )}
@@ -620,6 +624,7 @@ function App() {
             <h2>Add Room</h2>
 
             <input
+              type="text"
               placeholder="Title"
               value={adminRoom.title}
               onChange={(e) =>
@@ -627,6 +632,7 @@ function App() {
               }
             />
             <input
+              type="text"
               placeholder="Location"
               value={adminRoom.location}
               onChange={(e) =>
@@ -642,6 +648,7 @@ function App() {
               }
             />
             <input
+              type="text"
               placeholder="Room Type"
               value={adminRoom.room_type}
               onChange={(e) =>
@@ -696,6 +703,7 @@ function App() {
           <div className="modal">
             <h2>Admin Login</h2>
             <input
+              type="text"
               placeholder="Email"
               value={adminEmail}
               onChange={(e) => setAdminEmail(e.target.value)}
@@ -719,11 +727,13 @@ function App() {
           <div className="modal">
             <h2>{selectedRoom.title}</h2>
             <input
+              type="text"
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <input
+              type="text"
               placeholder="Phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
