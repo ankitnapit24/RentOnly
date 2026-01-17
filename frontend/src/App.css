@@ -211,8 +211,8 @@ input[type="file"] {
   padding: 14px 22px;
   border-radius: 14px;
   border: 1.5px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: white;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: white !important;
   font-size: 15px;
   width: 100%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -231,16 +231,18 @@ input::placeholder {
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px rgba(26, 26, 46, 0.9) inset !important;
   -webkit-text-fill-color: white !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 input:focus {
   outline: none;
   border-color: #667eea;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 
     0 0 0 4px rgba(102, 126, 234, 0.1),
     0 4px 20px rgba(102, 126, 234, 0.2);
@@ -249,17 +251,18 @@ input:focus {
 
 input:hover:not(:focus) {
   border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* ================= ROOMS GRID - FIXED FOR DESKTOP ================= */
 .rooms-grid {
   display: grid;
-  /* FIXED: Better grid layout - uses auto-fit instead of auto-fill */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  /* FIXED: Better grid layout that fills the screen properly */
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 28px;
   margin-top: 30px;
   animation: fadeInUp 0.8s ease-out;
+  justify-items: center;
 }
 
 @keyframes fadeInUp {
@@ -286,10 +289,8 @@ input:hover:not(:focus) {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   overflow: hidden;
   position: relative;
-  /* FIXED: Max width to prevent cards from being too wide when few rooms */
-  max-width: 450px;
-  margin: 0 auto;
   width: 100%;
+  max-width: 100%;
 }
 
 .room-card::before {
@@ -406,7 +407,7 @@ input:hover:not(:focus) {
 }
 
 .room-card button {
-  width: calc(100% - 0px);
+  width: 100%;
   margin-top: 18px;
   padding: 14px;
   font-size: 16px;
@@ -632,7 +633,7 @@ h2 {
 /* ================= RESPONSIVE ================= */
 @media (max-width: 1024px) {
   .rooms-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
   }
 }
@@ -664,6 +665,7 @@ h2 {
   .rooms-grid {
     grid-template-columns: 1fr;
     gap: 24px;
+    justify-items: stretch;
   }
 
   .room-card {
