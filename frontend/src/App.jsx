@@ -37,7 +37,6 @@ function App() {
   });
 
   const [uploading, setUploading] = useState(false);
-  const [loading, setLoading] = useState(true);
   
   // Image popup state
   const [imagePopup, setImagePopup] = useState(null);
@@ -58,104 +57,31 @@ function App() {
       url += "?" + params.join("&");
     }
 
-    console.log("Fetching rooms from:", url);
-
     fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Received rooms data:", data);
-        
-        if (Array.isArray(data)) {
-          const validRooms = data.filter(room => 
-            room && 
-            room.id && 
-            room.title && 
-            room.location && 
-            room.price
-          );
-          setRooms(validRooms);
-        } else {
-          console.error("Expected array but got:", typeof data);
-          setRooms([]);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching rooms:", err);
-        setRooms([]);
-        setLoading(false);
-      });
+      .then((res) => res.json())
+      .then(setRooms)
+      .catch((err) => console.error("Error fetching rooms:", err));
   };
 
   const fetchPendingRooms = () => {
     fetch(`${API_URL}/admin/rooms`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Received pending rooms:", data);
-        if (Array.isArray(data)) {
-          setPendingRooms(data);
-        } else {
-          setPendingRooms([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching pending rooms:", err);
-        setPendingRooms([]);
-      });
+      .then((res) => res.json())
+      .then(setPendingRooms)
+      .catch((err) => console.error("Error fetching pending rooms:", err));
   };
 
   const fetchEnquiries = () => {
     fetch(`${API_URL}/admin/enquiries`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Received enquiries:", data);
-        if (Array.isArray(data)) {
-          setEnquiries(data);
-        } else {
-          setEnquiries([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching enquiries:", err);
-        setEnquiries([]);
-      });
+      .then((res) => res.json())
+      .then(setEnquiries)
+      .catch((err) => console.error("Error fetching enquiries:", err));
   };
 
   const fetchAllApprovedRooms = () => {
     fetch(`${API_URL}/rooms`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Received approved rooms for delete:", data);
-        if (Array.isArray(data)) {
-          setAllApprovedRooms(data);
-        } else {
-          setAllApprovedRooms([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching approved rooms:", err);
-        setAllApprovedRooms([]);
-      });
+      .then((res) => res.json())
+      .then(setAllApprovedRooms)
+      .catch((err) => console.error("Error fetching approved rooms:", err));
   };
 
   useEffect(() => {
@@ -320,26 +246,7 @@ function App() {
     setEnquiries([]);
   };
 
-  // Helper function to safely get image URL
-  const getImageUrl = (room, index = 0) => {
-    if (!room) return "";
-    
-    if (room.images && Array.isArray(room.images) && room.images.length > 0) {
-      return room.images[index] || room.images[0];
-    }
-    
-    return room.image_url || "";
-  };
-
   /* ================= UI ================= */
-
-  if (loading) {
-    return (
-      <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <h2>Loading... 🏠</h2>
-      </div>
-    );
-  }
 
   return (
     <div className="container">
@@ -372,6 +279,7 @@ function App() {
       {/* USER VIEW */}
       {!adminMode && (
         <>
+          {/* FILTERS - FIXED: Removed inline styles */}
           <div className="filters-container">
             <input
               type="text"
@@ -405,77 +313,73 @@ function App() {
             />
           </div>
 
+          {/* ROOMS */}
           <div className="rooms-grid">
             {rooms.length === 0 ? (
               <div className="empty-state">
                 <h3>No rooms found 😕</h3>
               </div>
             ) : (
-              rooms.map((room) => {
-                if (!room || !room.id) return null;
-                
-                const currentIndex = imageIndexMap[room.id] || 0;
-                const imageUrl = getImageUrl(room, currentIndex);
-                const hasMultipleImages = room.images && Array.isArray(room.images) && room.images.length > 1;
+              rooms.map((room) => (
+                <div className="room-card" key={room.id}>
+                  <div className="image-slider">
+                    <img
+                      src={
+                        room.images && room.images.length > 0
+                          ? room.images[imageIndexMap[room.id] || 0]
+                          : room.image_url
+                      }
+                      alt={room.title}
+                      onClick={() => setImagePopup({ room, index: imageIndexMap[room.id] || 0 })}
+                    />
 
-                return (
-                  <div className="room-card" key={room.id}>
-                    <div className="image-slider">
-                      {imageUrl && (
-                        <img
-                          src={imageUrl}
-                          alt={room.title || "Room"}
-                          onClick={() => setImagePopup({ room, index: currentIndex })}
-                          onError={(e) => {
-                            console.error("Image failed to load:", imageUrl);
-                            e.target.src = "https://via.placeholder.com/400x300?text=Image+Not+Found";
-                          }}
-                        />
-                      )}
+                    {room.images && room.images.length > 1 && (
+                      <div className="slider-controls">
+                        <button
+                          onClick={() =>
+                            setImageIndexMap((prev) => ({
+                              ...prev,
+                              [room.id]:
+                                ((prev[room.id] || 0) - 1 +
+                                  room.images.length) %
+                                room.images.length,
+                            }))
+                          }
+                        >
+                          ←
+                        </button>
 
-                      {hasMultipleImages && (
-                        <div className="slider-controls">
-                          <button
-                            onClick={() =>
-                              setImageIndexMap((prev) => ({
-                                ...prev,
-                                [room.id]:
-                                  ((prev[room.id] || 0) - 1 + room.images.length) % room.images.length,
-                              }))
-                            }
-                          >
-                            ←
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              setImageIndexMap((prev) => ({
-                                ...prev,
-                                [room.id]: ((prev[room.id] || 0) + 1) % room.images.length,
-                              }))
-                            }
-                          >
-                            →
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="room-content">
-                      <div className="room-title">{room.title}</div>
-                      <div className="room-info">📍 {room.location}</div>
-                      <div className="room-info">₹ {room.price}</div>
-                      <div className="room-info">🛏 {room.room_type}</div>
-                      <button
-                        className="btn btn-primary room-btn"
-                        onClick={() => setSelectedRoom(room)}
-                      >
-                        I'm Interested
-                      </button>
-                    </div>
+                        <button
+                          onClick={() =>
+                            setImageIndexMap((prev) => ({
+                              ...prev,
+                              [room.id]:
+                                ((prev[room.id] || 0) + 1) %
+                                room.images.length,
+                            }))
+                          }
+                        >
+                          →
+                        </button>
+                      </div>
+                    )}
                   </div>
-                );
-              })
+
+                  {/* FIXED: Wrapped content in room-content div */}
+                  <div className="room-content">
+                    <div className="room-title">{room.title}</div>
+                    <div className="room-info">📍 {room.location}</div>
+                    <div className="room-info">₹ {room.price}</div>
+                    <div className="room-info">🛏 {room.room_type}</div>
+                    <button
+                      className="btn btn-primary room-btn"
+                      onClick={() => setSelectedRoom(room)}
+                    >
+                      I'm Interested
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </>
@@ -532,77 +436,73 @@ function App() {
           <h2>Pending Approvals</h2>
 
           <div className="rooms-grid">
-            {pendingRooms.map((room) => {
-              if (!room || !room.id) return null;
-              
-              const currentIndex = imageIndexMap[room.id] || 0;
-              const imageUrl = getImageUrl(room, currentIndex);
-              const hasMultipleImages = room.images && Array.isArray(room.images) && room.images.length > 1;
+            {pendingRooms.map((room) => (
+              <div className="room-card" key={room.id}>
+                <div className="image-slider">
+                  <img
+                    src={
+                      room.images && room.images.length > 0
+                        ? room.images[imageIndexMap[room.id] || 0]
+                        : room.image_url
+                    }
+                    alt={room.title}
+                    onClick={() => setImagePopup({ room, index: imageIndexMap[room.id] || 0 })}
+                  />
 
-              return (
-                <div className="room-card" key={room.id}>
-                  <div className="image-slider">
-                    {imageUrl && (
-                      <img
-                        src={imageUrl}
-                        alt={room.title}
-                        onClick={() => setImagePopup({ room, index: currentIndex })}
-                      />
-                    )}
-
-                    {hasMultipleImages && (
-                      <div className="slider-controls">
-                        <button
-                          onClick={() =>
-                            setImageIndexMap((prev) => ({
-                              ...prev,
-                              [room.id]:
-                                ((prev[room.id] || 0) - 1 + room.images.length) % room.images.length,
-                            }))
-                          }
-                        >
-                          ←
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            setImageIndexMap((prev) => ({
-                              ...prev,
-                              [room.id]: ((prev[room.id] || 0) + 1) % room.images.length,
-                            }))
-                          }
-                        >
-                          →
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="room-content">
-                    <div className="room-title">{room.title}</div>
-                    <div className="room-info">📍 {room.location}</div>
-                    <div className="room-info">₹ {room.price}</div>
-                    <div className="room-info">🛏 {room.room_type}</div>
-
-                    <div className="admin-actions">
+                  {room.images && room.images.length > 1 && (
+                    <div className="slider-controls">
                       <button
-                        className="btn btn-primary"
-                        onClick={() => approveRoom(room.id)}
+                        onClick={() =>
+                          setImageIndexMap((prev) => ({
+                            ...prev,
+                            [room.id]:
+                              ((prev[room.id] || 0) - 1 + room.images.length) %
+                              room.images.length,
+                          }))
+                        }
                       >
-                        Approve
+                        ←
                       </button>
 
                       <button
-                        className="btn btn-secondary"
-                        onClick={() => rejectRoom(room.id)}
+                        onClick={() =>
+                          setImageIndexMap((prev) => ({
+                            ...prev,
+                            [room.id]:
+                              ((prev[room.id] || 0) + 1) % room.images.length,
+                          }))
+                        }
                       >
-                        Reject
+                        →
                       </button>
                     </div>
+                  )}
+                </div>
+
+                <div className="room-content">
+                  <div className="room-title">{room.title}</div>
+                  <div className="room-info">📍 {room.location}</div>
+                  <div className="room-info">₹ {room.price}</div>
+                  <div className="room-info">🛏 {room.room_type}</div>
+
+                  <div className="admin-actions">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => approveRoom(room.id)}
+                    >
+                      Approve
+                    </button>
+
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => rejectRoom(room.id)}
+                    >
+                      Reject
+                    </button>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </>
       )}
@@ -657,65 +557,61 @@ function App() {
                 <h3>No approved rooms found 🏚️</h3>
               </div>
             ) : (
-              allApprovedRooms.map((room) => {
-                if (!room || !room.id) return null;
-                
-                const currentIndex = imageIndexMap[room.id] || 0;
-                const imageUrl = getImageUrl(room, currentIndex);
-                const hasMultipleImages = room.images && Array.isArray(room.images) && room.images.length > 1;
+              allApprovedRooms.map((room) => (
+              <div className="room-card" key={room.id}>
+                <div className="image-slider">
+                  <img
+                    src={
+                      room.images && room.images.length > 0
+                        ? room.images[imageIndexMap[room.id] || 0]
+                        : room.image_url
+                    }
+                    alt={room.title}
+                    onClick={() => setImagePopup({ room, index: imageIndexMap[room.id] || 0 })}
+                  />
 
-                return (
-                  <div className="room-card" key={room.id}>
-                    <div className="image-slider">
-                      {imageUrl && (
-                        <img
-                          src={imageUrl}
-                          alt={room.title}
-                          onClick={() => setImagePopup({ room, index: currentIndex })}
-                        />
-                      )}
-
-                      {hasMultipleImages && (
-                        <div className="slider-controls">
-                          <button
-                            onClick={() =>
-                              setImageIndexMap((prev) => ({
-                                ...prev,
-                                [room.id]:
-                                  ((prev[room.id] || 0) - 1 + room.images.length) % room.images.length,
-                              }))
-                            }
-                          >
-                            ←
-                          </button>
-
-                          <button
-                            onClick={() =>
-                              setImageIndexMap((prev) => ({
-                                ...prev,
-                                [room.id]: ((prev[room.id] || 0) + 1) % room.images.length,
-                              }))
-                            }
-                          >
-                            →
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div className="room-content">
-                      <div className="room-title">{room.title}</div>
-                      <div className="room-info">📍 {room.location}</div>
-                      <div className="room-info">₹ {room.price}</div>
+                  {room.images && room.images.length > 1 && (
+                    <div className="slider-controls">
                       <button
-                        className="btn btn-danger room-btn"
-                        onClick={() => deleteRoom(room.id)}
+                        onClick={() =>
+                          setImageIndexMap((prev) => ({
+                            ...prev,
+                            [room.id]:
+                              ((prev[room.id] || 0) - 1 + room.images.length) %
+                              room.images.length,
+                          }))
+                        }
                       >
-                        Delete
+                        ←
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          setImageIndexMap((prev) => ({
+                            ...prev,
+                            [room.id]:
+                              ((prev[room.id] || 0) + 1) % room.images.length,
+                          }))
+                        }
+                      >
+                        →
                       </button>
                     </div>
-                  </div>
-                );
-              })
+                  )}
+                </div>
+                <div className="room-content">
+                  <div className="room-title">{room.title}</div>
+                  <div className="room-info">📍 {room.location}</div>
+                  <div className="room-info">₹ {room.price}</div>
+                  <button
+                    className="btn btn-danger room-btn"
+                    onClick={() => deleteRoom(room.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
             )}
           </div>
         </>
@@ -821,12 +717,6 @@ function App() {
             <button className="btn btn-primary" onClick={adminLogin}>
               Login
             </button>
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => setShowAdminLogin(false)}
-            >
-              Cancel
-            </button>
           </div>
         </div>
       )}
@@ -885,7 +775,11 @@ function App() {
               </button>
 
               <img
-                src={getImageUrl(imagePopup.room, imagePopup.index)}
+                src={
+                  imagePopup.room.images && imagePopup.room.images.length > 0
+                    ? imagePopup.room.images[imagePopup.index]
+                    : imagePopup.room.image_url
+                }
                 alt={imagePopup.room.title}
               />
 
