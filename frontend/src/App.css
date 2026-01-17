@@ -98,11 +98,8 @@ body::before {
 }
 
 .top-bar h1::before {
-  content: '🏠';
-  -webkit-text-fill-color: initial;
-  filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
-  animation: pulse 2s ease-in-out infinite;
-  font-size: 36px;
+  content: '';
+  display: none;
 }
 
 @keyframes pulse {
@@ -203,12 +200,17 @@ body::before {
   transform: none !important;
 }
 
-/* ================= FILTERS - FIXED ================= */
+/* ================= FILTERS - IMPROVED MOBILE ================= */
 .filters-container {
   display: flex;
   gap: 12px;
-  marginBottom: 25px;
+  margin-bottom: 25px;
   flex-wrap: wrap;
+}
+
+.filters-container input {
+  flex: 1;
+  min-width: 180px;
 }
 
 input[type="text"],
@@ -229,12 +231,6 @@ input[type="file"] {
   appearance: none;
 }
 
-.filters-container input {
-  flex: 1;
-  min-width: 180px;
-}
-
-/* FIXED: Mobile placeholder visibility */
 input::placeholder {
   color: rgba(255, 255, 255, 0.5) !important;
   opacity: 1 !important;
@@ -266,7 +262,7 @@ input:hover:not(:focus) {
   background: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* ================= ROOMS GRID - FIXED FOR DESKTOP ================= */
+/* ================= ROOMS GRID ================= */
 .rooms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -388,7 +384,7 @@ input:hover:not(:focus) {
   transform: scale(0.95);
 }
 
-/* ================= ROOM CONTENT - FIXED ================= */
+/* ================= ROOM CONTENT ================= */
 .room-content {
   padding: 22px;
   display: flex;
@@ -422,7 +418,6 @@ input:hover:not(:focus) {
   font-size: 16px;
 }
 
-/* FIXED: Admin actions in room cards */
 .admin-actions {
   display: flex;
   gap: 10px;
@@ -435,7 +430,7 @@ input:hover:not(:focus) {
   padding: 12px;
 }
 
-/* ================= ADMIN MENU - FIXED ================= */
+/* ================= ADMIN MENU ================= */
 .admin-menu-container {
   text-align: center;
   padding: 40px 20px;
@@ -719,13 +714,28 @@ h2 {
     width: 100%;
   }
 
+  /* IMPROVED MOBILE FILTERS */
   .filters-container {
-    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
   }
 
   .filters-container input {
-    width: 100%;
-    min-width: 100%;
+    flex: 1;
+    min-width: 0;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  /* Location full width, prices share row */
+  .filters-container input:first-child {
+    flex-basis: 100%;
+  }
+
+  .filters-container input:nth-child(2),
+  .filters-container input:nth-child(3) {
+    flex: 1;
+    min-width: 0;
   }
 
   .rooms-grid {
@@ -759,12 +769,10 @@ h2 {
     right: 10px;
   }
 
-  /* FIXED: Better mobile input styling */
   input[type="text"],
   input[type="number"],
   input[type="password"] {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 16px 20px;
+    font-size: 16px;
   }
 
   .admin-actions {
@@ -822,6 +830,18 @@ h2 {
   }
 }
 
+/* Very small screens - stack filters if needed */
+@media (max-width: 400px) {
+  .filters-container {
+    flex-direction: column;
+  }
+
+  .filters-container input {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
 /* ================= SCROLLBAR ================= */
 ::-webkit-scrollbar {
   width: 12px;
@@ -863,7 +883,6 @@ input:focus-visible {
 
 /* ================= TOUCH DEVICE OPTIMIZATIONS ================= */
 @media (hover: none) and (pointer: coarse) {
-  /* Better tap targets for mobile */
   .btn {
     min-height: 44px;
   }
@@ -873,7 +892,6 @@ input:focus-visible {
     height: 48px;
   }
   
-  /* Remove hover effects on touch devices */
   .room-card:hover {
     transform: none;
   }
