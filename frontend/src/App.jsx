@@ -252,7 +252,7 @@ function App() {
     <div className="container">
       {/* TOP BAR */}
       <div className="top-bar">
-        <h1>🏠 Rental Rooms</h1>
+        <h1>🏠 Rent Only </h1>
 
         <div className="top-actions">
           <button
