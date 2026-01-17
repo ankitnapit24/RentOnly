@@ -203,7 +203,14 @@ body::before {
   transform: none !important;
 }
 
-/* ================= FILTERS ================= */
+/* ================= FILTERS - FIXED ================= */
+.filters-container {
+  display: flex;
+  gap: 12px;
+  marginBottom: 25px;
+  flex-wrap: wrap;
+}
+
 input[type="text"],
 input[type="number"],
 input[type="password"],
@@ -220,6 +227,11 @@ input[type="file"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+}
+
+.filters-container input {
+  flex: 1;
+  min-width: 180px;
 }
 
 /* FIXED: Mobile placeholder visibility */
@@ -257,12 +269,10 @@ input:hover:not(:focus) {
 /* ================= ROOMS GRID - FIXED FOR DESKTOP ================= */
 .rooms-grid {
   display: grid;
-  /* FIXED: Better grid layout that fills the screen properly */
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 28px;
   margin-top: 30px;
   animation: fadeInUp 0.8s ease-out;
-  justify-items: center;
 }
 
 @keyframes fadeInUp {
@@ -281,7 +291,6 @@ input:hover:not(:focus) {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  padding: 0;
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 
@@ -290,7 +299,8 @@ input:hover:not(:focus) {
   overflow: hidden;
   position: relative;
   width: 100%;
-  max-width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .room-card::before {
@@ -378,26 +388,25 @@ input:hover:not(:focus) {
   transform: scale(0.95);
 }
 
-/* ================= ROOM INFO ================= */
-.room-card > div:not(.image-slider) {
-  padding: 0 22px;
-}
-
-.room-card > button {
-  margin: 0 22px 22px 22px;
+/* ================= ROOM CONTENT - FIXED ================= */
+.room-content {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .room-title {
   font-size: 21px;
   font-weight: 700;
-  margin: 18px 0 12px 0;
+  margin-bottom: 12px;
   color: #fff;
   line-height: 1.3;
   letter-spacing: -0.3px;
 }
 
-.room-card > div {
-  margin: 10px 0;
+.room-info {
+  margin: 8px 0;
   font-size: 15px;
   color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
@@ -406,11 +415,59 @@ input:hover:not(:focus) {
   gap: 8px;
 }
 
-.room-card button {
+.room-btn {
   width: 100%;
-  margin-top: 18px;
+  margin-top: auto;
   padding: 14px;
   font-size: 16px;
+}
+
+/* FIXED: Admin actions in room cards */
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.admin-actions .btn {
+  flex: 1;
+  padding: 12px;
+}
+
+/* ================= ADMIN MENU - FIXED ================= */
+.admin-menu-container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.admin-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+  margin: 30px auto 0;
+}
+
+.admin-menu-buttons .btn {
+  padding: 15px;
+  font-size: 16px;
+}
+
+/* ================= ENQUIRY CARD ================= */
+.enquiry-card .room-content {
+  padding: 25px;
+}
+
+.enquiry-card b {
+  font-size: 18px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.enquiry-card p {
+  margin: 8px 0;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* ================= MODALS ================= */
@@ -618,7 +675,7 @@ input:hover:not(:focus) {
   letter-spacing: -0.3px;
 }
 
-/* ================= ADMIN MENU ================= */
+/* ================= HEADINGS ================= */
 h2 {
   font-size: 32px;
   margin: 30px 0;
@@ -662,14 +719,18 @@ h2 {
     width: 100%;
   }
 
+  .filters-container {
+    flex-direction: column;
+  }
+
+  .filters-container input {
+    width: 100%;
+    min-width: 100%;
+  }
+
   .rooms-grid {
     grid-template-columns: 1fr;
     gap: 24px;
-    justify-items: stretch;
-  }
-
-  .room-card {
-    max-width: 100%;
   }
 
   .modal {
@@ -704,6 +765,14 @@ h2 {
   input[type="password"] {
     font-size: 16px; /* Prevents zoom on iOS */
     padding: 16px 20px;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+  }
+
+  .admin-actions .btn {
+    width: 100%;
   }
 }
 
