@@ -296,7 +296,7 @@ function App() {
             </div>
           </div>
 
-          {/* OLD FILTERS - KEPT AS IS */}
+          {/* FILTERS */}
           <div className="filters-container">
             <input
               type="text"
@@ -318,6 +318,12 @@ function App() {
                 fetchRooms(filterLocation, v);
               }}
             />
+          </div>
+
+          {/* FEATURED PROPERTIES SECTION */}
+          <div className="featured-section">
+            <h2>Featured Properties</h2>
+            <p className="featured-subtitle">Browse through our handpicked verified listings in Bhopal</p>
           </div>
 
           {/* ROOMS */}
