@@ -62,7 +62,7 @@ body::before {
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 100;
   animation: slideDown 0.5s ease-out;
@@ -264,6 +264,47 @@ body::before {
   background: rgba(255, 255, 255, 0.35);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ================= FEATURED PROPERTIES SECTION ================= */
+.featured-section {
+  text-align: center;
+  padding: 60px 40px 40px;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.featured-section h2 {
+  font-size: 48px;
+  font-weight: 900;
+  color: #1a202c;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+  letter-spacing: -1.5px;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #1a202c;
+  position: relative;
+  display: inline-block;
+}
+
+.featured-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+.featured-subtitle {
+  font-size: 18px;
+  color: #718096;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  margin-top: 24px;
 }
 
 /* ================= FILTERS ================= */
@@ -913,6 +954,18 @@ h2 {
     padding: 12px 24px;
   }
   
+  .featured-section {
+    padding: 50px 30px 30px;
+  }
+  
+  .featured-section h2 {
+    font-size: 36px;
+  }
+  
+  .featured-subtitle {
+    font-size: 16px;
+  }
+  
   .filters-container {
     grid-template-columns: 1fr;
     margin: 40px 24px 30px;
@@ -986,6 +1039,18 @@ h2 {
   .feature-badge {
     font-size: 13px;
     padding: 10px 20px;
+  }
+  
+  .featured-section {
+    padding: 40px 20px 30px;
+  }
+  
+  .featured-section h2 {
+    font-size: 30px;
+  }
+  
+  .featured-subtitle {
+    font-size: 15px;
   }
 
   .btn {
