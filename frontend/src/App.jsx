@@ -25,7 +25,6 @@ function App() {
   const [allApprovedRooms, setAllApprovedRooms] = useState([]);
 
   const [filterLocation, setFilterLocation] = useState("");
-  const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
 
   const [adminRoom, setAdminRoom] = useState({
@@ -43,14 +42,13 @@ function App() {
 
   /* ================= FETCH ================= */
 
-  const fetchRooms = (location = "", min = "", max = "") => {
+  const fetchRooms = (location = "", max = "") => {
     let url = `${API_URL}/rooms`;
     const params = [];
 
     if (location.trim() !== "") {
       params.push(`location=${encodeURIComponent(location)}`);
     }
-    if (min !== "") params.push(`minPrice=${min}`);
     if (max !== "") params.push(`maxPrice=${max}`);
 
     if (params.length > 0) {
@@ -86,6 +84,12 @@ function App() {
 
   useEffect(() => {
     fetchRooms();
+    // Add fade-in class to body after mount
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+      document.body.style.transition = 'opacity 0.5s ease';
+      document.body.style.opacity = '1';
+    }, 100);
   }, []);
 
   /* ================= ADMIN ACTIONS ================= */
@@ -279,7 +283,20 @@ function App() {
       {/* USER VIEW */}
       {!adminMode && (
         <>
-          {/* FILTERS - FIXED: Removed inline styles */}
+          {/* HERO SECTION */}
+          <div className="hero-section">
+            <h2>Find PGs, Flats & Rooms in Bhopal</h2>
+            <p className="hero-subtitle">Zero Brokerage • Verified Properties • Direct Contact</p>
+            
+            <div className="hero-features">
+              <div className="feature-badge">✓ Zero Brokerage</div>
+              <div className="feature-badge">✓ Verified Properties</div>
+              <div className="feature-badge">✓ Direct Contact</div>
+              <div className="feature-badge">✓ 1000+ Listings</div>
+            </div>
+          </div>
+
+          {/* OLD FILTERS - KEPT AS IS */}
           <div className="filters-container">
             <input
               type="text"
@@ -288,17 +305,7 @@ function App() {
               onChange={(e) => {
                 const v = e.target.value;
                 setFilterLocation(v);
-                fetchRooms(v, minPrice, maxPrice);
-              }}
-            />
-            <input
-              type="number"
-              placeholder="Min Price"
-              value={minPrice}
-              onChange={(e) => {
-                const v = e.target.value;
-                setMinPrice(v);
-                fetchRooms(filterLocation, v, maxPrice);
+                fetchRooms(v, maxPrice);
               }}
             />
             <input
@@ -308,7 +315,7 @@ function App() {
               onChange={(e) => {
                 const v = e.target.value;
                 setMaxPrice(v);
-                fetchRooms(filterLocation, minPrice, v);
+                fetchRooms(filterLocation, v);
               }}
             />
           </div>
@@ -365,7 +372,6 @@ function App() {
                     )}
                   </div>
 
-                  {/* FIXED: Wrapped content in room-content div */}
                   <div className="room-content">
                     <div className="room-title">{room.title}</div>
                     <div className="room-info">📍 {room.location}</div>
@@ -716,6 +722,12 @@ function App() {
             />
             <button className="btn btn-primary" onClick={adminLogin}>
               Login
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowAdminLogin(false)}
+            >
+              Cancel
             </button>
           </div>
         </div>
