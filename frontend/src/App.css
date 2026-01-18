@@ -209,6 +209,63 @@ body::before {
   font-size: 16px;
 }
 
+/* ================= HERO SECTION ================= */
+.hero-section {
+  text-align: center;
+  padding: 80px 40px 100px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.hero-section h2 {
+  font-size: 56px;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+  letter-spacing: -1.5px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: white;
+}
+
+.hero-subtitle {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 50px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.hero-features {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.feature-badge {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  padding: 14px 32px;
+  border-radius: 50px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+}
+
+.feature-badge:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
 /* ================= FILTERS ================= */
 .filters-container {
   display: grid;
@@ -835,6 +892,27 @@ h2 {
     width: 100%;
   }
   
+  .hero-section {
+    padding: 60px 30px 80px;
+  }
+  
+  .hero-section h2 {
+    font-size: 38px;
+  }
+  
+  .hero-subtitle {
+    font-size: 18px;
+  }
+  
+  .hero-features {
+    gap: 12px;
+  }
+  
+  .feature-badge {
+    font-size: 14px;
+    padding: 12px 24px;
+  }
+  
   .filters-container {
     grid-template-columns: 1fr;
     margin: 40px 24px 30px;
@@ -885,6 +963,29 @@ h2 {
   
   .top-bar h1 {
     font-size: 22px;
+  }
+  
+  .hero-section {
+    padding: 50px 20px 70px;
+  }
+  
+  .hero-section h2 {
+    font-size: 32px;
+  }
+  
+  .hero-subtitle {
+    font-size: 16px;
+    margin-bottom: 35px;
+  }
+  
+  .hero-features {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .feature-badge {
+    font-size: 13px;
+    padding: 10px 20px;
   }
 
   .btn {
