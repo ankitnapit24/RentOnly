@@ -8,6 +8,10 @@ function App() {
   const [rooms, setRooms] = useState([]);
   const [imageIndexMap, setImageIndexMap] = useState({});
 
+  // NEW: Pagination state
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const [pendingRooms, setPendingRooms] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
 
@@ -108,8 +112,31 @@ function App() {
 
     fetch(url)
       .then((res) => res.json())
-      .then(setRooms)
+      .then(data => {
+        setRooms(data);
+        // Reset visible count when new rooms are fetched (e.g., after filtering)
+        setVisibleCount(10);
+      })
       .catch((err) => console.error("Error fetching rooms:", err));
+  };
+
+  // NEW: Load more rooms function
+  const loadMoreRooms = () => {
+    setIsLoadingMore(true);
+    
+    // Simulate loading delay for better UX
+    setTimeout(() => {
+      setVisibleCount(prevCount => prevCount + 10);
+      setIsLoadingMore(false);
+      
+      // Smooth scroll to show new content
+      setTimeout(() => {
+        window.scrollBy({
+          top: 400,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }, 300);
   };
 
   const fetchPendingRooms = () => {
@@ -315,6 +342,10 @@ function App() {
     setEnquiries([]);
   };
 
+  // Get rooms to display based on visible count
+  const displayedRooms = rooms.slice(0, visibleCount);
+  const hasMoreRooms = visibleCount < rooms.length;
+
   /* ================= UI ================= */
 
   return (
@@ -393,12 +424,12 @@ function App() {
 
           {/* ROOMS - USER VIEW (NO EXACT LOCATION) */}
           <div className="rooms-grid">
-            {rooms.length === 0 ? (
+            {displayedRooms.length === 0 ? (
               <div className="empty-state">
                 <h3>No rooms found 😕</h3>
               </div>
             ) : (
-              rooms.map((room) => (
+              displayedRooms.map((room) => (
                 <div className="room-card" key={room.id}>
                   <div className="image-slider">
                     <img
@@ -459,6 +490,52 @@ function App() {
                 </div>
               ))
             )}
+          </div>
+
+      
+              {/* LOAD MORE BUTTON SECTION - NEW */}
+{rooms.length > 0 && hasMoreRooms && (
+  <div className="load-more-container">
+    <button
+      className="btn btn-primary load-more-btn"
+      onClick={loadMoreRooms}
+      disabled={isLoadingMore}
+    >
+      {isLoadingMore ? (
+        <>
+          <span className="loading-spinner"></span>
+          Loading...
+        </>
+      ) : (
+        `Load More (${rooms.length - visibleCount} more rooms)`
+      )}
+    </button>
+    {/* REMOVE THIS LINE - Showing count */}
+    {/* <p className="load-more-info">
+      Showing {displayedRooms.length} of {rooms.length} properties
+    </p> */}
+  </div>
+)}
+
+
+          {/* FOOTER SECTION - Now accessible without endless scrolling */}
+          <div className="footer-section">
+            <div className="footer-content">
+              <h3>📞 Contact Us</h3>
+              <p>Email: rentonly00@gmail.com </p>
+              <p>Address: Bhopal, Madhya Pradesh</p>
+              
+              <div className="footer-links">
+                <a href="#">About Us</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">FAQ</a>
+              </div>
+              
+              <p className="footer-copyright">
+                © {new Date().getFullYear()} Rent Only. All rights reserved.
+              </p>
+            </div>
           </div>
         </>
       )}
