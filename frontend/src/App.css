@@ -1331,23 +1331,37 @@ h2 {
 
 .popular-areas-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
   margin-top: 40px;
   max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+  .popular-areas-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
 }
 
 .area-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 16px;
-  padding: 40px 20px;
+  padding: 30px 15px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+@media (min-width: 768px) {
+  .area-card {
+    padding: 40px 20px;
+  }
 }
 
 .area-card::before {
@@ -1372,17 +1386,31 @@ h2 {
 }
 
 .area-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  font-size: 40px;
+  margin-bottom: 12px;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+@media (min-width: 768px) {
+  .area-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
 }
 
 .area-card h3 {
   color: white;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
-  margin: 12px 0 8px;
+  margin: 8px 0 6px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media (min-width: 768px) {
+  .area-card h3 {
+    font-size: 22px;
+    margin: 12px 0 8px;
+  }
 }
 
 .area-card p {
