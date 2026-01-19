@@ -16,9 +16,9 @@ const port = process.env.PORT || 5000;
 /* ================= CORS - ALLOW FRONTEND ================= */
 app.use(cors({
   origin: [
-    "http://localhost:5173", // Local development
-    "https://your-frontend.vercel.app", // Replace with your actual Vercel URL
-    "https://your-frontend.netlify.app" // Or Netlify URL
+    "http://localhost:5173",
+    "https://your-frontend.vercel.app",
+    "https://your-frontend.netlify.app"
   ],
   credentials: true
 }));
@@ -76,7 +76,11 @@ app.get("/rooms", async (req, res) => {
     let query = { status: "APPROVED" };
 
     if (location) {
-      query.location = { $regex: location, $options: "i" };
+      // Search in both area_location and exact_location
+      query.$or = [
+        { area_location: { $regex: location, $options: "i" } },
+        { exact_location: { $regex: location, $options: "i" } }
+      ];
     }
     if (minPrice || maxPrice) {
       query.price = {};
@@ -85,10 +89,11 @@ app.get("/rooms", async (req, res) => {
     }
 
     const rooms = await Room.find(query).sort({ created_at: -1 });
-    // Transform to include id field for frontend compatibility
+    // Transform to include id field and combined location for frontend
     const transformedRooms = rooms.map(r => ({
       ...r.toObject(),
-      id: r._id
+      id: r._id,
+      location: `${r.area_location}${r.exact_location ? ', ' + r.exact_location : ''}`
     }));
     res.json(transformedRooms);
   } catch (err) {
@@ -99,9 +104,9 @@ app.get("/rooms", async (req, res) => {
 /* ================= ADD ROOM (WITH CLOUDINARY) ================= */
 app.post("/rooms", upload.array("images", 5), async (req, res) => {
   try {
-    const { title, location, price, room_type } = req.body;
+    const { title, area_location, exact_location, price, room_type, owner_phone } = req.body;
 
-    if (!title || !location || !price || !room_type) {
+    if (!title || !area_location || !exact_location || !price || !room_type || !owner_phone) {
       return res.status(400).json({ error: "All fields required" });
     }
 
@@ -114,9 +119,11 @@ app.post("/rooms", upload.array("images", 5), async (req, res) => {
 
     const newRoom = new Room({
       title,
-      location,
+      area_location,
+      exact_location,
       price: Number(price),
       room_type,
+      owner_phone,
       image_url: firstImage,
       images: imageUrls,
       status: "PENDING"
@@ -136,7 +143,8 @@ app.get("/admin/rooms", async (req, res) => {
     const rooms = await Room.find({ status: "PENDING" }).sort({ created_at: -1 });
     const transformedRooms = rooms.map(r => ({
       ...r.toObject(),
-      id: r._id
+      id: r._id,
+      location: `${r.area_location}${r.exact_location ? ', ' + r.exact_location : ''}`
     }));
     res.json(transformedRooms);
   } catch (err) {
@@ -187,7 +195,6 @@ app.post("/enquiry", async (req, res) => {
 app.get("/admin/enquiries", async (req, res) => {
   try {
     const enquiries = await Enquiry.find().populate("room_id", "title").sort({ created_at: -1 });
-    // Transform to match old MySQL structure if needed by frontend
     const transformedEnquiries = enquiries.map(e => ({
       ...e.toObject(),
       id: e._id,
@@ -200,11 +207,27 @@ app.get("/admin/enquiries", async (req, res) => {
   }
 });
 
+/* ================= DELETE ENQUIRY - NEW ENDPOINT ================= */
+app.delete("/admin/enquiries/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedEnquiry = await Enquiry.findByIdAndDelete(id);
+    
+    if (!deletedEnquiry) {
+      return res.status(404).json({ error: "Enquiry not found" });
+    }
+    
+    res.json({ success: true, message: "Enquiry deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting enquiry:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const fs = require("fs");
 /* ================= SERVE FRONTEND ================= */
 const frontendPath = path.join(__dirname, "frontend", "dist");
 
-// Log for debugging on Render
 console.log("Serving frontend from:", frontendPath);
 
 app.use(express.static(frontendPath));
@@ -215,4 +238,3 @@ app.get("/*", (req, res) => {
 
 /* ================= START ================= */
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
-
