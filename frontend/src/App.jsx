@@ -95,6 +95,14 @@ function App() {
     "Vidhan Sabha",
   ];
 
+  // Popular areas with property counts (you can update these dynamically)
+  const popularAreas = [
+    { name: "Indrapuri", icon: "🏢", count: "110+" },
+    { name: "Anand Nagar", icon: "🏘️", count: "95+" },
+    { name: "Ashoka Garden", icon: "🌳", count: "120+" },
+    { name: "Awadhpuri", icon: "🏙️", count: "85+" }
+  ];
+
   /* ================= FETCH ================= */
 
   const fetchRooms = (location = "", max = "") => {
@@ -137,6 +145,19 @@ function App() {
         });
       }, 100);
     }, 300);
+  };
+
+  // NEW: Handle popular area click
+  const handleAreaClick = (areaName) => {
+    setFilterLocation(areaName);
+    fetchRooms(areaName, maxPrice);
+    // Smooth scroll to rooms section
+    setTimeout(() => {
+      const roomsSection = document.querySelector('.featured-section');
+      if (roomsSection) {
+        roomsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const fetchPendingRooms = () => {
@@ -414,7 +435,24 @@ function App() {
                 fetchRooms(filterLocation, v);
               }}
             />
+            
+            <button
+            className="btn btn-reset"
+            onClick={() => {
+
+
+              setFilterLocation("");
+              setMaxPrice("");
+              fetchRooms("","");
+
+            }}
+           >
+            Reset Filters
+           </button>
+
           </div>
+
+
 
           {/* FEATURED PROPERTIES SECTION */}
           <div className="featured-section">
@@ -493,32 +531,47 @@ function App() {
           </div>
 
       
-              {/* LOAD MORE BUTTON SECTION - NEW */}
-{rooms.length > 0 && hasMoreRooms && (
-  <div className="load-more-container">
-    <button
-      className="btn btn-primary load-more-btn"
-      onClick={loadMoreRooms}
-      disabled={isLoadingMore}
-    >
-      {isLoadingMore ? (
-        <>
-          <span className="loading-spinner"></span>
-          Loading...
-        </>
-      ) : (
-        `Load More (${rooms.length - visibleCount} more rooms)`
-      )}
-    </button>
-    {/* REMOVE THIS LINE - Showing count */}
-    {/* <p className="load-more-info">
-      Showing {displayedRooms.length} of {rooms.length} properties
-    </p> */}
-  </div>
-)}
+          {/* LOAD MORE BUTTON SECTION */}
+          {rooms.length > 0 && hasMoreRooms && (
+            <div className="load-more-container">
+              <button
+                className="btn btn-primary load-more-btn"
+                onClick={loadMoreRooms}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? (
+                  <>
+                    <span className="loading-spinner"></span>
+                    Loading...
+                  </>
+                ) : (
+                  `Load More (${rooms.length - visibleCount} more rooms)`
+                )}
+              </button>
+            </div>
+          )}
 
+          {/* POPULAR AREAS SECTION - NEW */}
+          <div className="popular-areas-section">
+            <h2>Explore Popular Areas in Bhopal</h2>
+            <p className="popular-subtitle">Find your perfect room in these prime locations</p>
+            
+            <div className="popular-areas-grid">
+              {popularAreas.map((area, index) => (
+                <div 
+                  className="area-card" 
+                  key={index}
+                  onClick={() => handleAreaClick(area.name)}
+                >
+                  <div className="area-icon">{area.icon}</div>
+                  <h3>{area.name}</h3>
+                  <p>{area.count} Properties</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          {/* FOOTER SECTION - Now accessible without endless scrolling */}
+          {/* FOOTER SECTION */}
           <div className="footer-section">
             <div className="footer-content">
               <h3>📞 Contact Us</h3>
