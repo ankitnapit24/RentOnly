@@ -1113,3 +1113,183 @@ h2 {
   background: rgba(102, 126, 234, 0.3);
   color: #1a202c;
 }
+
+/* Add these styles to your existing App.css file */
+
+/* Load More Container */
+.load-more-container {
+  text-align: center;
+  margin: 40px 0;
+  padding: 20px;
+}
+
+.load-more-btn {
+  padding: 15px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ea7166 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 250px;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.load-more-info {
+  margin-top: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Footer Section */
+.footer-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  padding: 60px 20px;
+  margin-top: 60px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.footer-content h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.footer-content p {
+  color: #555;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  margin-top: 30px;
+  color: #777;
+  font-size: 14px;
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .load-more-btn {
+    padding: 12px 30px;
+    font-size: 15px;
+    min-width: 200px;
+  }
+  
+  .footer-section {
+    padding: 40px 15px;
+  }
+  
+  .footer-links {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .load-more-btn {
+    width: 100%;
+    padding: 14px 20px;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+
+
+.load-more-info {
+  margin-top: 15px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+
+
+.load-more-info {
+  margin-top: 15px;
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 500;
+  background: #edf2f7;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .load-more-info {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .load-more-info {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
