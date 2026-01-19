@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import API_URL from "./config";
+
+// API URL Configuration
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function App() {
   const [rooms, setRooms] = useState([]);
@@ -29,9 +31,11 @@ function App() {
 
   const [adminRoom, setAdminRoom] = useState({
     title: "",
-    location: "",
+    area_location: "",
+    exact_location: "",
     price: "",
     room_type: "",
+    owner_phone: "",
     imageFiles: [],
   });
 
@@ -39,6 +43,53 @@ function App() {
   
   // Image popup state
   const [imagePopup, setImagePopup] = useState(null);
+
+  // Bhopal locations for dropdown
+  const bhopalLocations = [
+    "Anand Nagar",
+    "Arera Colony",
+    "Ashoka Garden",
+    "Awadhpuri",
+    "Ayodhya Bypass Road",
+    "Bag Mugalia",
+    "Bagsevania",
+    "Bairagarh",
+    "Bawadiya Kalan",
+    "Berasia Road",
+    "Bhopal Talkies",
+    "Bittan Market",
+    "Board Office",
+    "Char Imli",
+    "Chinar Fortune City",
+    "Chunabhatti",
+    "Dakachya",
+    "Danish Kunj",
+    "Gautam Nagar",
+    "Govindpura",
+    "Gulmohar",
+    "Habibganj",
+    "Hoshangabad Road",
+    "Indrapuri",
+    "Jahangirabad",
+    "Kolar Road",
+    "Lalghati",
+    "MP Nagar",
+    "Malviya Nagar",
+    "Mansarovar Complex",
+    "Misrod",
+    "Narela Shankari",
+    "Nehru Nagar",
+    "New Market",
+    "Patrakar Colony",
+    "Piplani",
+    "Raisen Road",
+    "Saket Nagar",
+    "Shahpura",
+    "Shivaji Nagar",
+    "Sunny City",
+    "TT Nagar",
+    "Vidhan Sabha",
+  ];
 
   /* ================= FETCH ================= */
 
@@ -84,7 +135,6 @@ function App() {
 
   useEffect(() => {
     fetchRooms();
-    // Add fade-in class to body after mount
     document.body.style.opacity = '0';
     setTimeout(() => {
       document.body.style.transition = 'opacity 0.5s ease';
@@ -126,6 +176,17 @@ function App() {
     }).catch((err) => console.error("Error deleting room:", err));
   };
 
+  const deleteEnquiry = (id) => {
+    if (!window.confirm("Delete this enquiry?")) return;
+
+    fetch(`${API_URL}/admin/enquiries/${id}`, {
+      method: "DELETE",
+    }).then(() => {
+      alert("Enquiry deleted 🗑️");
+      fetchEnquiries();
+    }).catch((err) => console.error("Error deleting enquiry:", err));
+  };
+
   /* ================= ADD ROOM WITH FILE UPLOAD ================= */
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -139,9 +200,9 @@ function App() {
   };
 
   const addRoom = async () => {
-    const { title, location, price, room_type, imageFiles } = adminRoom;
+    const { title, area_location, exact_location, price, room_type, owner_phone, imageFiles } = adminRoom;
 
-    if (!title || !location || !price || !room_type) {
+    if (!title || !area_location || !exact_location || !price || !room_type || !owner_phone) {
       alert("Please fill all fields");
       return;
     }
@@ -153,9 +214,11 @@ function App() {
 
     const formData = new FormData();
     formData.append("title", title);
-    formData.append("location", location);
+    formData.append("area_location", area_location);
+    formData.append("exact_location", exact_location);
     formData.append("price", price);
     formData.append("room_type", room_type);
+    formData.append("owner_phone", owner_phone);
 
     imageFiles.forEach((file) => {
       formData.append("images", file);
@@ -176,9 +239,11 @@ function App() {
         setShowAdmin(false);
         setAdminRoom({
           title: "",
-          location: "",
+          area_location: "",
+          exact_location: "",
           price: "",
           room_type: "",
+          owner_phone: "",
           imageFiles: [],
         });
         if (adminMode) fetchPendingRooms();
@@ -326,7 +391,7 @@ function App() {
             <p className="featured-subtitle">Browse through our handpicked verified listings in Bhopal</p>
           </div>
 
-          {/* ROOMS */}
+          {/* ROOMS - USER VIEW (NO EXACT LOCATION) */}
           <div className="rooms-grid">
             {rooms.length === 0 ? (
               <div className="empty-state">
@@ -380,7 +445,8 @@ function App() {
 
                   <div className="room-content">
                     <div className="room-title">{room.title}</div>
-                    <div className="room-info">📍 {room.location}</div>
+                    {/* ONLY SHOW AREA LOCATION, NOT EXACT ADDRESS */}
+                    <div className="room-info">📍 {room.area_location || room.location}</div>
                     <div className="room-info">₹ {room.price}</div>
                     <div className="room-info">🛏 {room.room_type}</div>
                     <button
@@ -435,7 +501,7 @@ function App() {
         </div>
       )}
 
-      {/* PENDING APPROVAL SECTION */}
+      {/* PENDING APPROVAL SECTION - ADMIN VIEW (SHOWS EXACT LOCATION) */}
       {adminMode && pendingApprovalMode && (
         <>
           <button
@@ -493,9 +559,11 @@ function App() {
 
                 <div className="room-content">
                   <div className="room-title">{room.title}</div>
+                  {/* ADMIN CAN SEE EXACT LOCATION */}
                   <div className="room-info">📍 {room.location}</div>
                   <div className="room-info">₹ {room.price}</div>
                   <div className="room-info">🛏 {room.room_type}</div>
+                  <div className="room-info">📞 {room.owner_phone}</div>
 
                   <div className="admin-actions">
                     <button
@@ -545,6 +613,13 @@ function App() {
                     <p style={{ fontSize: "12px", color: "#888" }}>
                       {new Date(e.created_at).toLocaleDateString()}
                     </p>
+                    <button
+                      className="btn btn-danger room-btn"
+                      onClick={() => deleteEnquiry(e.id)}
+                      style={{ marginTop: "10px" }}
+                    >
+                      Delete Enquiry
+                    </button>
                   </div>
                 </div>
               ))
@@ -553,7 +628,7 @@ function App() {
         </>
       )}
 
-      {/* DELETE MODE */}
+      {/* DELETE MODE - ADMIN VIEW */}
       {adminMode && deleteMode && (
         <>
           <button
@@ -613,8 +688,12 @@ function App() {
                 </div>
                 <div className="room-content">
                   <div className="room-title">{room.title}</div>
-                  <div className="room-info">📍 {room.location}</div>
+                  {/* ADMIN CAN SEE EXACT LOCATION IN DELETE MODE */}
+                  <div className="room-info">📍 Area: {room.area_location || room.location}</div>
+                  <div className="room-info">🏠 Address: {room.exact_location || "Not provided"}</div>
                   <div className="room-info">₹ {room.price}</div>
+                  <div className="room-info">🛏 {room.room_type}</div>
+                  <div className="room-info">📞 {room.owner_phone}</div>
                   <button
                     className="btn btn-danger room-btn"
                     onClick={() => deleteRoom(room.id)}
@@ -637,22 +716,55 @@ function App() {
 
             <input
               type="text"
-              placeholder="Title"
+              placeholder="Title (e.g., Spacious 2BHK near Metro)"
               value={adminRoom.title}
               onChange={(e) =>
                 setAdminRoom({ ...adminRoom, title: e.target.value })
               }
             />
-            <input
-              type="text"
-              placeholder="Location"
-              value={adminRoom.location}
+
+            <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block" }}>
+              Location in Bhopal *
+            </label>
+            <select
+              value={adminRoom.area_location}
               onChange={(e) =>
-                setAdminRoom({ ...adminRoom, location: e.target.value })
+                setAdminRoom({ ...adminRoom, area_location: e.target.value })
               }
-            />
+              style={{
+                marginBottom: "20px",
+                padding: "16px 24px",
+                borderRadius: "12px",
+                border: "2px solid rgba(102, 126, 234, 0.15)",
+                background: "white",
+                fontSize: "15px",
+                width: "100%",
+                fontFamily: "inherit",
+                fontWeight: "500",
+                cursor: "pointer"
+              }}
+            >
+              <option value="">Select Location</option>
+              {bhopalLocations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+
+            {adminRoom.area_location && (
+              <input
+                type="text"
+                placeholder="Enter complete address (House/Flat No., Street, Landmark...)"
+                value={adminRoom.exact_location}
+                onChange={(e) =>
+                  setAdminRoom({ ...adminRoom, exact_location: e.target.value })
+                }
+              />
+            )}
+
             <input
-              placeholder="Price"
+              placeholder="Rent per Month (₹)"
               type="number"
               value={adminRoom.price}
               onChange={(e) =>
@@ -661,10 +773,19 @@ function App() {
             />
             <input
               type="text"
-              placeholder="Room Type"
+              placeholder="Room Type (e.g., 1BHK, 2BHK, PG, Single Room)"
               value={adminRoom.room_type}
               onChange={(e) =>
                 setAdminRoom({ ...adminRoom, room_type: e.target.value })
+              }
+            />
+
+            <input
+              type="tel"
+              placeholder="Owner Phone Number"
+              value={adminRoom.owner_phone}
+              onChange={(e) =>
+                setAdminRoom({ ...adminRoom, owner_phone: e.target.value })
               }
             />
 
@@ -746,18 +867,18 @@ function App() {
             <h2>{selectedRoom.title}</h2>
             <input
               type="text"
-              placeholder="Name"
+              placeholder="Your Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <input
               type="text"
-              placeholder="Phone"
+              placeholder="Your Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
             <button className="btn btn-primary" onClick={submitEnquiry}>
-              Submit
+              Submit Enquiry
             </button>
             <button
               className="btn btn-secondary"
