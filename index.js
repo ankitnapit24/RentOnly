@@ -17,6 +17,7 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     "http://localhost:5173",
+    "https://rent-only-final-v2.onrender.com",
     "https://your-frontend.vercel.app",
     "https://your-frontend.netlify.app"
   ],
@@ -224,15 +225,16 @@ app.delete("/admin/enquiries/:id", async (req, res) => {
   }
 });
 
+/* ================= SERVE FRONTEND (MUST BE LAST!) ================= */
 const fs = require("fs");
-/* ================= SERVE FRONTEND ================= */
 const frontendPath = path.join(__dirname, "frontend", "dist");
 
 console.log("Serving frontend from:", frontendPath);
 
 app.use(express.static(frontendPath));
 
-app.get("/*", (req, res) => {
+// This catch-all route MUST be last - after all API routes
+app.get("*", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
