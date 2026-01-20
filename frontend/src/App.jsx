@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 // API URL Configuration
-const API_URL = window.location.origin;
+//  const API_URL = window.location.origin;//
+
+// API URL Configuration - Works for both development and production
+const API_URL = import.meta.env.MODE === 'production' 
+  ? window.location.origin 
+  : "http://localhost:5000";
+
+
 
 function App() {
   const [rooms, setRooms] = useState([]);
@@ -15,9 +22,10 @@ function App() {
   const [pendingRooms, setPendingRooms] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
 
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+ const [selectedRoom, setSelectedRoom] = useState(null);
+const [showGeneralEnquiry, setShowGeneralEnquiry] = useState(false);
+const [name, setName] = useState("");
+const [phone, setPhone] = useState("");
 
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
@@ -306,30 +314,62 @@ function App() {
     }
   };
 
-  /* ================= ENQUIRY ================= */
+ /* ================= ENQUIRY ================= */
 
-  const submitEnquiry = () => {
-    if (!name || !phone) {
-      alert("Fill all fields");
-      return;
+const submitEnquiry = () => {
+  if (!name || !phone) {
+    alert("Fill all fields");
+    return;
+  }
+
+  fetch(`${API_URL}/enquiry`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      room_id: selectedRoom.id,
+      name,
+      phone,
+    }),
+  }).then(() => {
+    alert("Enquiry sent ✅");
+    setSelectedRoom(null);
+    setName("");
+    setPhone("");
+  }).catch((err) => console.error("Error submitting enquiry:", err));
+};
+
+const submitGeneralEnquiry = () => {
+  if (!name || !phone) {
+    alert("Fill all fields");
+    return;
+  }
+
+  fetch(`${API_URL}/general-enquiry`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      phone,
+    }),
+  })
+  .then((res) => {
+    if (!res.ok) {
+      throw new Error('Network response was not ok');
     }
-
-    fetch(`${API_URL}/enquiry`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        room_id: selectedRoom.id,
-        name,
-        phone,
-      }),
-    }).then(() => {
-      alert("Enquiry sent ✅");
-      setSelectedRoom(null);
-      setName("");
-      setPhone("");
-    }).catch((err) => console.error("Error submitting enquiry:", err));
-  };
-
+    return res.json();
+  })
+  .then((data) => {
+    console.log("General enquiry response:", data); // Debug log
+    alert("We'll call you soon! ✅");
+    setShowGeneralEnquiry(false);
+    setName("");
+    setPhone("");
+  })
+  .catch((err) => {
+    console.error("Error submitting general enquiry:", err);
+    alert("Failed to submit enquiry. Please try again.");
+  });
+};
   /* ================= ADMIN LOGIN ================= */
 
   const adminLogin = () => {
@@ -550,26 +590,87 @@ function App() {
               </button>
             </div>
           )}
+{/* POPULAR AREAS SECTION - NEW */}
+<div className="popular-areas-section">
+  <h2>Explore Popular Areas in Bhopal</h2>
+  <p className="popular-subtitle">Find your perfect room in these prime locations</p>
+  
+  <div className="popular-areas-grid">
+    {popularAreas.map((area, index) => (
+      <div 
+        className="area-card" 
+        key={index}
+        onClick={() => handleAreaClick(area.name)}
+      >
+        <div className="area-icon">{area.icon}</div>
+        <h3>{area.name}</h3>
+        <p>{area.count} Properties</p>
+      </div>
+    ))}
+  </div>
+</div>
 
-          {/* POPULAR AREAS SECTION - NEW */}
-          <div className="popular-areas-section">
-            <h2>Explore Popular Areas in Bhopal</h2>
-            <p className="popular-subtitle">Find your perfect room in these prime locations</p>
-            
-            <div className="popular-areas-grid">
-              {popularAreas.map((area, index) => (
-                <div 
-                  className="area-card" 
-                  key={index}
-                  onClick={() => handleAreaClick(area.name)}
-                >
-                  <div className="area-icon">{area.icon}</div>
-                  <h3>{area.name}</h3>
-                  <p>{area.count} Properties</p>
-                </div>
-              ))}
-            </div>
-          </div>
+{/* WANT MORE DETAILS SECTION */}
+<div style={{
+  textAlign: 'center',
+  padding: '60px 20px',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  position: 'relative',
+  overflow: 'hidden'
+}}>
+  <div style={{
+    position: 'relative',
+    zIndex: 1,
+    maxWidth: '600px',
+    margin: '0 auto'
+  }}>
+    <p style={{
+      fontSize: '28px',
+      fontWeight: '700',
+      color: 'white',
+      marginBottom: '15px',
+      textShadow: '0 2px 8px rgba(0,0,0,0.2)'
+    }}>
+      Want More Details?
+    </p>
+    <p style={{
+      fontSize: '16px',
+      color: 'rgba(255, 255, 255, 0.9)',
+      marginBottom: '30px',
+      fontWeight: '500'
+    }}>
+      Our team will help you find the perfect property
+    </p>
+    <button
+      className="btn"
+      onClick={() => setShowGeneralEnquiry(true)}
+      style={{
+        fontSize: '18px',
+        padding: '18px 50px',
+        background: 'white',
+        color: '#667eea',
+        fontWeight: '700',
+        border: 'none',
+        borderRadius: '12px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+        transition: 'all 0.3s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+      }}
+    >
+      📞 Request a Call
+    </button>
+  </div>
+</div>
+
+{/* FOOTER SECTION */}
 
           {/* FOOTER SECTION */}
           <div className="footer-section">
@@ -990,36 +1091,68 @@ function App() {
         </div>
       )}
 
-      {/* ENQUIRY MODAL */}
-      {selectedRoom && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>{selectedRoom.title}</h2>
-            <input
-              type="text"
-              placeholder="Your Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Your Phone Number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-            <button className="btn btn-primary" onClick={submitEnquiry}>
-              Submit Enquiry
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => setSelectedRoom(null)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+     {/* ENQUIRY MODAL */}
+{selectedRoom && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h2>{selectedRoom.title}</h2>
+      <input
+        type="text"
+        placeholder="Your Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Your Phone Number"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+      />
+      <button className="btn btn-primary" onClick={submitEnquiry}>
+        Submit Enquiry
+      </button>
+      <button
+        className="btn btn-secondary"
+        onClick={() => setSelectedRoom(null)}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
 
+{/* GENERAL ENQUIRY MODAL */}
+{showGeneralEnquiry && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h2>Request a Call Back</h2>
+      <p style={{ color: '#4a5568', marginBottom: '20px' }}>
+        Our team will contact you shortly to help you find the perfect property
+      </p>
+      <input
+        type="text"
+        placeholder="Your Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Your Phone Number"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+      />
+      <button className="btn btn-primary" onClick={submitGeneralEnquiry}>
+        Submit Request
+      </button>
+      <button
+        className="btn btn-secondary"
+        onClick={() => setShowGeneralEnquiry(false)}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
       {/* IMAGE POPUP */}
       {imagePopup && (
         <div className="modal-overlay" onClick={() => setImagePopup(null)}>
