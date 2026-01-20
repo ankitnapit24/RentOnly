@@ -193,17 +193,51 @@ app.post("/enquiry", async (req, res) => {
   }
 });
 
+/* ================= GENERAL ENQUIRY (NO ROOM) ================= */
+app.post("/general-enquiry", async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    const newEnquiry = new Enquiry({ 
+      room_id: null,
+      name, 
+      phone,
+      is_general: true
+    });
+    await newEnquiry.save();
+    res.json({ message: "General enquiry saved" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/admin/enquiries", async (req, res) => {
   try {
-    const enquiries = await Enquiry.find().populate("room_id", "title").sort({ created_at: -1 });
-    const transformedEnquiries = enquiries.map(e => ({
-      ...e.toObject(),
-      id: e._id,
-      room_title: e.room_id ? e.room_id.title : "Deleted Room",
-      room_id: e.room_id ? e.room_id._id : null
-    }));
+    const enquiries = await Enquiry.find()
+      .populate({
+        path: "room_id",
+        select: "title",
+        // Don't fail if room_id is null or room doesn't exist
+        options: { strictPopulate: false }
+      })
+      .sort({ created_at: -1 });
+    
+    const transformedEnquiries = enquiries.map(e => {
+      const enquiryObj = e.toObject();
+      return {
+        ...enquiryObj,
+        id: e._id,
+        room_title: e.is_general 
+          ? "General Enquiry" 
+          : (enquiryObj.room_id && enquiryObj.room_id.title 
+              ? enquiryObj.room_id.title 
+              : "Deleted Room"),
+        room_id: enquiryObj.room_id ? enquiryObj.room_id._id : null
+      };
+    });
+    
     res.json(transformedEnquiries);
   } catch (err) {
+    console.error("Error fetching enquiries:", err);
     res.status(500).json({ error: err.message });
   }
 });
