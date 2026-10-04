@@ -2,7 +2,7 @@
 
 RentOnly is a rental property platform designed to help users find **PGs, flats, and rooms in Bhopal** and directly submit enquiries for available properties.
 
-The platform provides a property listing interface for users and an admin panel for managing room listings and enquiries.
+The platform provides a property listing interface for users and an admin panel for managing room listings and enquiries
 
 ---
 
